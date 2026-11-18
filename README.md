@@ -1,27 +1,77 @@
-# Simulación electoral con Mesa
+# Simulación multiagente del proceso electoral
 
-Migración del script original a Mesa 3.3.1 (Python 3.11 o superior). Conserva heapq como cola de eventos discretos; un step procesa un evento y t_min indica minutos simulados desde las 07:30. No equivale a un minuto por step.
+## Estructura del proyecto
 
-## Instalación (macOS)
+| Archivo | Descripción |
+|---|---|
+| modelo_electoral.py | Modelo principal de la simulación y comportamiento de los agentes. |
+| requirements.txt | Dependencias necesarias para ejecutar el proyecto. |
+| README.md | Documentación del proyecto. |
+| .gitignore | Archivos y carpetas que no se deben subir al repositorio. |
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt
-python modelo_electoral.py --modo demo --seed 3
-python modelo_electoral.py --modo jornada --seed 3
-```
+## Instalación y ejecución
 
-Cada ejecución genera eventos_unity.json y metricas_mesa.csv (sobrescribe los anteriores). El modelo expone estado_unity() para una futura API. No incluye servidor ni cliente Unity.
+### 1. Clonar el repositorio
 
-## Repositorio
+Copiar la URL del repositorio desde GitHub y ejecutar en la terminal:
 
-```bash
-git init
-git add .
-git commit -m "Migración del modelo electoral a Mesa"
-```
+    git clone URL_DEL_REPOSITORIO
+    cd simulacion-electoral
 
-## Validación de migración
+### 2. Crear un entorno virtual
 
-Se compararon el script original y la adaptación con una implementación de prueba mínima de las interfaces Model, Agent y DataCollector; los reportes y JSON coincidieron byte a byte en demo y jornada con semilla 3. No se pudo instalar Mesa en el entorno de validación; falta repetir las pruebas con la dependencia real. Se preservaron las reglas del script original, incluidas sus limitaciones: espera promedio solo entre quienes votaron y fila máxima solo de verificación; no es una validación empírica del proceso real.
+    python3 -m venv .venv
+
+### 3. Activar el entorno virtual
+
+**macOS y Linux:**
+
+    source .venv/bin/activate
+
+**Windows (PowerShell):**
+
+    .venv\Scripts\Activate.ps1
+
+### 4. Instalar las dependencias
+
+    pip install -r requirements.txt
+
+### 5. Ejecutar la simulación
+
+**Modo demostración:**
+
+    python modelo_electoral.py --modo demo --seed 3
+
+**Modo jornada electoral completa:**
+
+    python modelo_electoral.py --modo jornada --seed 3
+
+## Modos de simulación
+
+| Característica | Demo | Jornada |
+|---|---|---|
+| Población | 80 votantes | Lista nominal de 690 ciudadanos |
+| Verificadores | 3 | 3 |
+| Mamparas | 3 | 3 |
+| Eventos extraordinarios | Programados | Probabilísticos |
+| Inicio | 07:30 | 07:30 |
+| Cierre | 18:00 | 18:00 |
+| Semilla predeterminada | 3 | 3 |
+
+La semilla permite reproducir los resultados de la simulación bajo las mismas condiciones.
+
+## Archivos generados
+
+Al ejecutar la simulación se generan automáticamente los siguientes archivos:
+- **eventos_unity.json:** registro de los eventos ocurridos durante la simulación.
+- **metricas_mesa.csv:** registro de las métricas recopiladas mediante DataCollector.
+
+
+## Consideraciones importantes
+
+- No subir la carpeta .venv.
+- No subir archivos temporales o generados automáticamente.
+- Actualizar requirements.txt si se agregan nuevas dependencias.
+- Probar el funcionamiento del código antes de subir cambios.
+- Documentar las nuevas funcionalidades.
+- Evitar modificar directamente la rama main.
