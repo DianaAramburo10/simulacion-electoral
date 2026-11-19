@@ -1,0 +1,19 @@
+﻿experimento,escenario,condicion,atendidos,fila_maxima,espera_promedio,porcentaje_atendidos
+Numero de votantes,40 votantes,Sin eventos externos,32.0,26.8,20.771669519632646,80.0
+Numero de votantes,40 votantes,Con eventos externos,24.6,25.0,19.71675894656024,61.5
+Numero de votantes,80 votantes,Sin eventos externos,73.4,21.2,6.4615279815055455,91.75
+Numero de votantes,80 votantes,Con eventos externos,54.8,21.6,10.675859567128633,68.5
+Numero de votantes,120 votantes,Sin eventos externos,111.8,24.4,4.313073164090347,93.16666666666666
+Numero de votantes,120 votantes,Con eventos externos,69.0,26.2,11.91002982885612,57.5
+Intervalo de llegadas,1.0 min,Sin eventos externos,68.2,34.4,12.437445411611021,85.25
+Intervalo de llegadas,1.0 min,Con eventos externos,53.6,34.2,15.045663236794093,67.0
+Intervalo de llegadas,1.5 min,Sin eventos externos,73.4,21.2,6.4615279815055455,91.75
+Intervalo de llegadas,1.5 min,Con eventos externos,54.8,21.6,10.675859567128633,68.5
+Intervalo de llegadas,3.0 min,Sin eventos externos,76.8,11.2,2.7431194100881946,96.0
+Intervalo de llegadas,3.0 min,Con eventos externos,37.0,12.6,9.53014594396539,46.25
+Numero de mamparas,2 mamparas,Sin eventos externos,74.4,21.2,6.569118675785203,93.0
+Numero de mamparas,2 mamparas,Con eventos externos,41.8,22.2,15.864140404666733,52.25
+Numero de mamparas,3 mamparas,Sin eventos externos,73.4,21.2,6.4615279815055455,91.75
+Numero de mamparas,3 mamparas,Con eventos externos,54.8,21.6,10.675859567128633,68.5
+Numero de mamparas,4 mamparas,Sin eventos externos,72.6,21.2,6.464361793649834,90.75
+Numero de mamparas,4 mamparas,Con eventos externos,49.8,23.0,11.473919414092117,62.25

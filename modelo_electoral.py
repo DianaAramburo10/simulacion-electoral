@@ -1,6 +1,8 @@
 import math
 import heapq
 import json
+import csv
+
 from collections import deque, Counter
 from datetime import datetime, timedelta
 import mesa
@@ -225,24 +227,40 @@ class Casilla:
 
 class ModeloElectoral(mesa.Model):
 
-    def __init__(self, modo='demo', seed=3, n_demo=80, lista_nominal=690):
+    def __init__(self, modo='demo', seed=3, n_demo=80,
+             lista_nominal=690, intervalo_llegadas=1.5,
+             num_mamparas=NUM_MAMPARAS,
+             eventos_externos=True):
+
         super().__init__(seed=seed)
         if modo not in ('demo', 'jornada'):
             raise ValueError('Modo inválido')
         self.MODO = modo
         self.SEMILLA = seed
+        
         self.N_DEMO = n_demo
         self.LISTA_NOMINAL = lista_nominal
+        self.INTERVALO_LLEGADAS = intervalo_llegadas
+        self.NUM_MAMPARAS = num_mamparas
+        self.EVENTOS_EXTERNOS = eventos_externos
+
+        if self.N_DEMO < 1:
+            raise ValueError("El número de votantes debe ser positivo")
+        if self.INTERVALO_LLEGADAS <= 0:
+            raise ValueError("El intervalo de llegadas debe ser positivo")
+        if self.NUM_MAMPARAS < 1:
+            raise ValueError("Debe existir al menos una mampara")
+
         self.t_min = 0.0
         self.P_REVOLTOSO = 0.12 if self.MODO == 'demo' else 0.03
         self.P_TRAMPOSO = 0.04 if self.MODO == 'demo' else 0.002
-        if self.MODO == 'demo':
+        if self.MODO == 'demo' and self.EVENTOS_EXTERNOS:
             self.FORZAR = {'lluvia': 75, 'ataque': 100, 'tornado': 130}
         else:
             self.FORZAR = {'lluvia': None, 'ataque': None, 'tornado': None}
         self.proporciones = {eleccion: self.dirichlet(PROPORCIONES[eleccion]) for eleccion in ELECCIONES}
         self.verificadores = [True] * NUM_VERIFICADORES
-        self.mamparas = [True] * NUM_MAMPARAS
+        self.mamparas = [True] * self.NUM_MAMPARAS
         self.fila_verificacion = deque()
         self.fila_mampara = deque()
         self.eventos = []
@@ -257,7 +275,7 @@ class ModeloElectoral(mesa.Model):
         if self.MODO == 'demo':
             tiempo_llegada = 10
             for i in range(self.N_DEMO):
-                tiempo_llegada += self.random.expovariate(1 / 1.5)
+                tiempo_llegada += self.random.expovariate(1 / self.INTERVALO_LLEGADAS)
                 votante = self.crear_votante(i + 1)
                 self.votantes.append(votante)
                 self.nuevo_evento(tiempo_llegada, 'Llegada', votante)
@@ -282,18 +300,31 @@ class ModeloElectoral(mesa.Model):
         self.nuevo_evento(0, 'Instalacion')
         self.nuevo_evento(0, 'Tick')
         self.nuevo_evento(T_CIERRE, 'Cierre')
-        for i in range(10):
-            self.nuevo_evento(T_APERTURA + 60 * i, 'Clima')
-        if self.FORZAR['lluvia'] is not None:
-            self.nuevo_evento(self.FORZAR['lluvia'], 'Clima', None, 'forzada')
-        if self.FORZAR['ataque'] is not None:
-            self.nuevo_evento(self.FORZAR['ataque'], 'Ataque')
-        elif self.random.random() < P_ATAQUE:
-            self.nuevo_evento(self.random.uniform(90, 570), 'Ataque')
-        if self.FORZAR['tornado'] is not None:
-            self.nuevo_evento(self.FORZAR['tornado'], 'Tornado')
-        elif self.random.random() < P_TORNADO:
-            self.nuevo_evento(self.random.uniform(120, 560), 'Tornado')
+
+
+        if self.EVENTOS_EXTERNOS:
+            for i in range(10):
+                self.nuevo_evento(T_APERTURA + 60 * i, 'Clima')
+
+            if self.FORZAR['lluvia'] is not None:
+                self.nuevo_evento(
+                    self.FORZAR['lluvia'], 'Clima', None, 'forzada'
+                )
+
+            if self.FORZAR['ataque'] is not None:
+                self.nuevo_evento(self.FORZAR['ataque'], 'Ataque')
+            elif self.random.random() < P_ATAQUE:
+                self.nuevo_evento(
+                    self.random.uniform(90, 570), 'Ataque'
+                )
+
+            if self.FORZAR['tornado'] is not None:
+                self.nuevo_evento(self.FORZAR['tornado'], 'Tornado')
+            elif self.random.random() < P_TORNADO:
+                self.nuevo_evento(
+                    self.random.uniform(120, 560), 'Tornado'
+                )
+        
         self.datacollector = DataCollector(model_reporters={'Tiempo_min': 't_min', 'Fila_verificacion': lambda m: len(m.fila_verificacion), 'Fila_mampara': lambda m: len(m.fila_mampara), 'Fila_maxima': lambda m: m.casilla.max_fila, 'Votantes_atendidos': lambda m: sum((v.ya_voto for v in m.votantes)), 'Espera_promedio': lambda m: m.metricas()['espera_promedio']})
         self.datacollector.collect(self)
 
@@ -340,10 +371,24 @@ class ModeloElectoral(mesa.Model):
         self.contador += 1
         heapq.heappush(self.eventos, (tiempo, self.contador, tipo, votante, recurso))
 
+    
     def enviar_a_unity(self, t, tipo, texto, votante=None, importante=True):
-        self.eventos_unity.append({'t_min': round(t, 2), 'hora': self.hora(t), 'tipo': tipo, 'votante': votante.id if votante else None, 'estado': votante.estado if votante else None, 'texto': texto})
+        evento = {
+            't_min': round(t, 2),
+            'hora': self.hora(t),
+            'tipo': tipo,
+            'votante': votante.id if votante else None,
+            'estado': votante.estado if votante else None,
+            'edad': votante.edad if votante else None,
+            'genero': votante.genero if votante else None,
+            'texto': texto
+        }
+
+        self.eventos_unity.append(evento)
+
         if importante or self.MODO == 'demo':
             print(f'{self.hora(t)} | {texto}')
+
 
     def tiempo_disponible(self, t):
         return max(t, self.casilla.pausada_hasta, self.casilla.suspendida_hasta)
@@ -524,7 +569,7 @@ class ModeloElectoral(mesa.Model):
     def mampara(self, t):
         if not self.casilla.puede_atender(t):
             return
-        for i in range(NUM_MAMPARAS):
+        for i in range(self.NUM_MAMPARAS):
             if not self.mamparas[i] or not self.fila_mampara:
                 continue
             votante = self.fila_mampara.popleft()
@@ -645,7 +690,12 @@ class ModeloElectoral(mesa.Model):
         self.enviar_a_unity(t, 'Inundación', f'Se suspende la casilla {duracion:.1f} minutos.')
 
     def ataque(self, t):
-        if self.casilla.fin_votacion or self.casilla.robada or self.casilla.suspendida_definitiva:
+        if (
+            self.casilla.fin_votacion
+            or self.casilla.robada
+            or self.casilla.suspendida_definitiva
+            or self.casilla.suspendida
+        ):
             return
         atacantes = max(3, self.poisson(8))
         self.casilla.incidentes['Ataque Minion'] += 1
@@ -687,40 +737,148 @@ class ModeloElectoral(mesa.Model):
             self.suspender(t, duracion, 'ataque Minion fallido')
             self.enviar_a_unity(t, 'Suspensión', f'La casilla se reorganiza durante {duracion:.1f} minutos.')
 
+    
     def tornado(self, t):
-        if self.casilla.hubo_tornado or self.casilla.fin_votacion or self.casilla.robada:
+        if (
+            self.casilla.hubo_tornado
+            or self.casilla.fin_votacion
+            or self.casilla.robada
+        ):
             return
+
         self.casilla.hubo_tornado = True
         self.casilla.incidentes['Tornado'] += 1
+
         evacuacion = self.triangular(10, 30, 120)
-        self.enviar_a_unity(t, 'Tornado', '¡TORNADO! Se evacúa la casilla.')
+
+        self.enviar_a_unity(
+            t,
+            'Tornado',
+            '¡TORNADO! Se evacúa la casilla.'
+        )
+
+        # Identificar a los votantes en filas
+        afectados = {}
+
         for votante in list(self.fila_verificacion) + list(self.fila_mampara):
+            afectados[votante.id] = votante
+
+        # Identificar también a quienes están siendo atendidos
+        eventos_atencion = {'Verificar', 'LlegaMampara', 'Mampara', 'Urna'}
+
+        for evento in self.eventos:
+            tiempo, numero, tipo, votante, recurso = evento
+
+            if tipo in eventos_atencion and votante is not None:
+                afectados[votante.id] = votante
+
+        # Cancelar los eventos de atención de los evacuados
+        self.eventos = [
+            evento
+            for evento in self.eventos
+            if not (
+                evento[2] in eventos_atencion
+                and evento[3] is not None
+                and evento[3].id in afectados
+            )
+        ]
+
+        # Reconstruir la cola de prioridad de heapq
+        heapq.heapify(self.eventos)
+
+        # Vaciar filas y liberar verificadores y mamparas
+        self.fila_verificacion.clear()
+        self.fila_mampara.clear()
+
+        self.verificadores = [True] * NUM_VERIFICADORES
+        self.mamparas = [True] * self.NUM_MAMPARAS
+
+        # Decidir qué ocurre con cada votante evacuado
+        for votante in afectados.values():
             estado_anterior = votante.estado
+
+            if (
+                votante.t_fila is not None
+                and estado_anterior == 'Esperando verificación'
+            ):
+                votante.espera += max(0, t - votante.t_fila)
+
+            votante.t_fila = None
+
             if self.random.random() < 0.4:
                 votante.estado = 'Evacuado (regresará)'
-                if votante.t_fila is not None and estado_anterior == 'Esperando verificación':
-                    votante.espera += max(0, t - votante.t_fila)
-                self.nuevo_evento(t + evacuacion + self.random.uniform(0, 20), 'Llegada', votante)
+
+                regreso = (
+                    t
+                    + evacuacion
+                    + self.random.uniform(0, 20)
+                )
+
+                self.nuevo_evento(regreso, 'Llegada', votante)
+
+                self.enviar_a_unity(
+                    t,
+                    'Evacuación',
+                    f'Votante {votante.id} evacúa y planea regresar.',
+                    votante,
+                    importante=False
+                )
+
             else:
                 votante.estado = 'Evacuado (no regresó)'
                 votante.salida = t
-        self.fila_verificacion.clear()
-        self.fila_mampara.clear()
+
+                self.enviar_a_unity(
+                    t,
+                    'Evacuación',
+                    f'Votante {votante.id} evacúa y no regresará.',
+                    votante,
+                    importante=False
+                )
+
+        # Posible pérdida de votos ya depositados
         if self.random.random() < 0.3:
-            perdidos = int(len(self.casilla.urna['Presidencia']) * self.random.uniform(0.3, 1))
+            perdidos = int(
+                len(self.casilla.urna['Presidencia'])
+                * self.random.uniform(0.3, 1)
+            )
+
             for eleccion in ELECCIONES:
                 self.random.shuffle(self.casilla.urna[eleccion])
-                self.casilla.urna[eleccion] = self.casilla.urna[eleccion][perdidos:]
+                self.casilla.urna[eleccion] = (
+                    self.casilla.urna[eleccion][perdidos:]
+                )
+
             self.casilla.votos_perdidos += perdidos
-            self.enviar_a_unity(t, 'Material perdido', f'El tornado provoca la pérdida de {perdidos} votos.')
+
+            self.enviar_a_unity(
+                t,
+                'Material perdido',
+                f'El tornado provoca la pérdida de {perdidos} votos.'
+            )
+
+        # Decidir si la casilla puede reubicarse
         if self.presidente.decidir_reubicar():
             self.casilla.techo = True
+
             self.suspender(t, evacuacion, 'tornado')
-            self.enviar_a_unity(t, 'Reubicación', 'El presidente decide reubicar la casilla dentro del plantel.')
+
+            self.enviar_a_unity(
+                t,
+                'Reubicación',
+                'El presidente decide reubicar la casilla dentro del plantel.'
+            )
+
         else:
             self.casilla.suspendida_definitiva = True
             self.casilla.cerrada = True
-            self.enviar_a_unity(t, 'Suspensión definitiva', 'La casilla no puede continuar después del tornado.')
+
+            self.enviar_a_unity(
+                t,
+                'Suspensión definitiva',
+                'La casilla no puede continuar después del tornado.'
+            )
+
 
     def cierre(self, t):
         self.casilla.cerrada = True
@@ -728,19 +886,32 @@ class ModeloElectoral(mesa.Model):
         self.revisar_fin_votacion(t)
 
     def revisar_fin_votacion(self, t):
-        if self.casilla.fin_votacion or self.casilla.robada or (self.casilla.suspendida and (not self.casilla.suspendida_definitiva)):
+        if (
+            self.casilla.fin_votacion
+            or self.casilla.robada
+            
+            or self.casilla.suspendida
+            or self.casilla.suspendida_definitiva
+        ):
             return
+
         if not self.casilla.cerrada:
             return
+
         if self.fila_verificacion or self.fila_mampara:
             return
+
         if not all(self.verificadores):
             return
+
         if not all(self.mamparas):
             return
-        pendientes = {'Verificar', 'LlegaMampara', 'Mampara', 'Urna'}
-        if any((evento[2] in pendientes for evento in self.eventos)):
+
+        pendientes = {"Verificar", "LlegaMampara", "Mampara", "Urna"}
+
+        if any(evento[2] in pendientes for evento in self.eventos):
             return
+
         self.escrutinio(t)
 
     def escrutinio(self, t):
@@ -891,6 +1062,76 @@ class ModeloElectoral(mesa.Model):
         votaron = [v for v in self.votantes if v.ya_voto]
         return {'votantes_atendidos': len(votaron), 'fila_maxima': self.casilla.max_fila, 'espera_promedio': sum((v.espera for v in votaron)) / len(votaron) if votaron else 0.0}
 
+
+    def exportar_resultados_graficas(self):
+        # Guardar los resultados de las seis elecciones
+        with open(
+            "resultados_elecciones.csv",
+            "w",
+            newline="",
+            encoding="utf-8-sig"
+        ) as archivo:
+            escritor = csv.writer(archivo)
+            escritor.writerow(["Eleccion", "Partido", "Votos"])
+
+            for eleccion, conteo in self.casilla.resultados.items():
+                for partido, nombre in PARTIDOS.items():
+                    escritor.writerow([
+                        eleccion,
+                        nombre,
+                        conteo[partido]
+                    ])
+
+                escritor.writerow([
+                    eleccion,
+                    "Coalición doble marca PTA+FN",
+                    conteo["PTA+FN"]
+                ])
+
+                escritor.writerow([
+                    eleccion,
+                    "Votos nulos",
+                    conteo["Nulos"]
+                ])
+
+                escritor.writerow([
+                    eleccion,
+                    "No registrados",
+                    conteo["No registrado"]
+                ])
+
+        # Guardar edad, género y participación
+        with open(
+            "demografia_votantes.csv",
+            "w",
+            newline="",
+            encoding="utf-8-sig"
+        ) as archivo:
+            escritor = csv.writer(archivo)
+            escritor.writerow([
+                "Grupo_edad", "Genero", "Voto"
+            ])
+
+            for votante in self.votantes:
+                if votante.edad <= 29:
+                    grupo = "18-29"
+                elif votante.edad <= 44:
+                    grupo = "30-44"
+                elif votante.edad <= 64:
+                    grupo = "45-64"
+                else:
+                    grupo = "65+"
+
+                escritor.writerow([
+                    grupo,
+                    votante.genero,
+                    "Si" if votante.ya_voto else "No"
+                ])
+
+        print("Archivos para gráficas exportados correctamente.")
+
+
+
     def resultados_finales(self):
         print('\n' + '=' * 70)
         print('RESULTADOS DE LA SIMULACIÓN')
@@ -939,8 +1180,12 @@ class ModeloElectoral(mesa.Model):
             print('No hay resultados disponibles.')
         else:
             print('\nNo se completó el escrutinio.')
+        
+        self.exportar_resultados_graficas()
+
         with open('eventos_unity.json', 'w', encoding='utf-8') as archivo:
             json.dump(sorted(self.eventos_unity, key=lambda evento: evento['t_min']), archivo, ensure_ascii=False, indent=2)
+
         print(f'\n{len(self.eventos_unity)} eventos guardados en eventos_unity.json')
         print('\nSIMULACIÓN FINALIZADA')
 
