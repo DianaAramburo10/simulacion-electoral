@@ -1,6 +1,9 @@
 .venv/
+venv/
 __pycache__/
 *.pyc
 .DS_Store
 eventos_unity.json
 metricas_mesa.csv
+.venv_nuevo/
+.venv_windows/
