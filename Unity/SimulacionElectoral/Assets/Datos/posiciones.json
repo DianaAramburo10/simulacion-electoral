@@ -1,0 +1,623 @@
+[
+ {
+  "nombre": "Arbol",
+  "blender": {
+   "x": -10.912,
+   "y": -16.0,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": 10.912,
+   "y": 0.0,
+   "z": 16.0,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Arbol_2",
+  "blender": {
+   "x": -0.406,
+   "y": -16.4,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": 0.406,
+   "y": 0.0,
+   "z": 16.4,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Arbol_3",
+  "blender": {
+   "x": 10.584,
+   "y": -15.802,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": -10.584,
+   "y": 0.0,
+   "z": 15.802,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Arbol_4",
+  "blender": {
+   "x": -21.408,
+   "y": -15.5,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": 21.408,
+   "y": 0.0,
+   "z": 15.5,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Arbol_5",
+  "blender": {
+   "x": -11.904,
+   "y": 5.5,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": 11.904,
+   "y": 0.0,
+   "z": -5.5,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Arbol_6",
+  "blender": {
+   "x": 11.588,
+   "y": 4.5,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": -11.588,
+   "y": 0.0,
+   "z": -4.5,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Banderines",
+  "blender": {
+   "x": 0.0,
+   "y": 1.34,
+   "z": 2.14,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": -0.0,
+   "y": 2.14,
+   "z": -1.34,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Calle",
+  "blender": {
+   "x": -5.0,
+   "y": -11.5,
+   "z": -0.23,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": 5.0,
+   "y": -0.23,
+   "z": 11.5,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Cartel",
+  "blender": {
+   "x": -3.787,
+   "y": 0.9,
+   "z": 1.3,
+   "giro_z": 90.0
+  },
+  "unity_esperado": {
+   "x": 3.787,
+   "y": 1.3,
+   "z": -0.9,
+   "giro_y": -90.0
+  }
+ },
+ {
+  "nombre": "Casa",
+  "blender": {
+   "x": -16.0,
+   "y": -16.2,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": 16.0,
+   "y": 0.0,
+   "z": 16.2,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Casa_2",
+  "blender": {
+   "x": -6.0,
+   "y": -16.2,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": 6.0,
+   "y": 0.0,
+   "z": 16.2,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Casa_3",
+  "blender": {
+   "x": 5.0,
+   "y": -16.2,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": -5.0,
+   "y": 0.0,
+   "z": 16.2,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Maceta",
+  "blender": {
+   "x": 3.465,
+   "y": 2.38,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": -3.465,
+   "y": 0.0,
+   "z": -2.38,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Maceta.001",
+  "blender": {
+   "x": -3.335,
+   "y": -2.57,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": 3.335,
+   "y": 0.0,
+   "z": 2.57,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Mampara",
+  "blender": {
+   "x": 2.5,
+   "y": 1.5,
+   "z": 0.0,
+   "giro_z": -90.0
+  },
+  "unity_esperado": {
+   "x": -2.5,
+   "y": 0.0,
+   "z": -1.5,
+   "giro_y": 90.0
+  }
+ },
+ {
+  "nombre": "Mampara.001",
+  "blender": {
+   "x": 2.5,
+   "y": 0.3,
+   "z": 0.0,
+   "giro_z": -90.0
+  },
+  "unity_esperado": {
+   "x": -2.5,
+   "y": 0.0,
+   "z": -0.3,
+   "giro_y": 90.0
+  }
+ },
+ {
+  "nombre": "Mampara_Accesible",
+  "blender": {
+   "x": 2.55,
+   "y": -1.05,
+   "z": 0.0,
+   "giro_z": -90.0
+  },
+  "unity_esperado": {
+   "x": -2.55,
+   "y": 0.0,
+   "z": 1.05,
+   "giro_y": 90.0
+  }
+ },
+ {
+  "nombre": "Mesa_Funcionarios",
+  "blender": {
+   "x": 0.0,
+   "y": 2.0,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": -0.0,
+   "y": 0.0,
+   "z": -2.0,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Papeleria",
+  "blender": {
+   "x": 0.035,
+   "y": 1.92,
+   "z": 0.75,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": -0.035,
+   "y": 0.75,
+   "z": -1.92,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Pared_Fondo",
+  "blender": {
+   "x": 0.0,
+   "y": 2.9,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": -0.0,
+   "y": 0.0,
+   "z": -2.9,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Pared_Izquierda",
+  "blender": {
+   "x": -3.9,
+   "y": -0.0,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": 3.9,
+   "y": 0.0,
+   "z": 0.0,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Patio",
+  "blender": {
+   "x": 0.0,
+   "y": -3.0,
+   "z": -0.12,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": -0.0,
+   "y": -0.12,
+   "z": 3.0,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Piso",
+  "blender": {
+   "x": 0.0,
+   "y": 0.0,
+   "z": -0.2,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": -0.0,
+   "y": -0.2,
+   "z": -0.0,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Silla",
+  "blender": {
+   "x": -0.8,
+   "y": 2.5,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": 0.8,
+   "y": 0.0,
+   "z": -2.5,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Silla.001",
+  "blender": {
+   "x": 0.0,
+   "y": 2.5,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": -0.0,
+   "y": 0.0,
+   "z": -2.5,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Silla.002",
+  "blender": {
+   "x": 0.8,
+   "y": 2.5,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": -0.8,
+   "y": 0.0,
+   "z": -2.5,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Terreno",
+  "blender": {
+   "x": 0.0,
+   "y": 0.0,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": -0.0,
+   "y": 0.0,
+   "z": -0.0,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Toldo",
+  "blender": {
+   "x": 0.0,
+   "y": 2.2,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": -0.0,
+   "y": 0.0,
+   "z": -2.2,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Unifila",
+  "blender": {
+   "x": -6.1,
+   "y": -1.4,
+   "z": -0.02,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": 6.1,
+   "y": -0.02,
+   "z": 1.4,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Urna",
+  "blender": {
+   "x": -0.5,
+   "y": -2.2,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": 0.5,
+   "y": 0.0,
+   "z": 2.2,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Urna.001",
+  "blender": {
+   "x": 0.1,
+   "y": -2.2,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": -0.1,
+   "y": 0.0,
+   "z": 2.2,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Urna.002",
+  "blender": {
+   "x": 0.7,
+   "y": -2.2,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": -0.7,
+   "y": 0.0,
+   "z": 2.2,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Urna.003",
+  "blender": {
+   "x": 1.3,
+   "y": -2.2,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": -1.3,
+   "y": 0.0,
+   "z": 2.2,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Urna.004",
+  "blender": {
+   "x": 1.9,
+   "y": -2.2,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": -1.9,
+   "y": 0.0,
+   "z": 2.2,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Urna.005",
+  "blender": {
+   "x": 2.5,
+   "y": -2.2,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": -2.5,
+   "y": 0.0,
+   "z": 2.2,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Punto_Puerta_Casa",
+  "tipo": "punto",
+  "blender": {
+   "x": -14.8,
+   "y": -13.6,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": 14.8,
+   "y": 0.0,
+   "z": 13.6,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Punto_Puerta_Casa_2",
+  "tipo": "punto",
+  "blender": {
+   "x": -4.8,
+   "y": -13.6,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": 4.8,
+   "y": 0.0,
+   "z": 13.6,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Punto_Puerta_Casa_3",
+  "tipo": "punto",
+  "blender": {
+   "x": 6.2,
+   "y": -13.6,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": -6.2,
+   "y": 0.0,
+   "z": 13.6,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Punto_Fin_De_Fila",
+  "tipo": "punto",
+  "blender": {
+   "x": -8.0,
+   "y": -1.4,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": 8.0,
+   "y": 0.0,
+   "z": 1.4,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Punto_Entrada_Casilla",
+  "tipo": "punto",
+  "blender": {
+   "x": -3.9,
+   "y": -1.4,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": 3.9,
+   "y": 0.0,
+   "z": 1.4,
+   "giro_y": 0.0
+  }
+ },
+ {
+  "nombre": "Punto_Cruce_Calle",
+  "tipo": "punto",
+  "blender": {
+   "x": -9.0,
+   "y": -11.5,
+   "z": 0.0,
+   "giro_z": 0.0
+  },
+  "unity_esperado": {
+   "x": 9.0,
+   "y": 0.0,
+   "z": 11.5,
+   "giro_y": 0.0
+  }
+ }
+]
