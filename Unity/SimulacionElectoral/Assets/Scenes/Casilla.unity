@@ -2683,6 +2683,57 @@ Transform:
   - {fileID: 298859172}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2141017731
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2141017733}
+  - component: {fileID: 2141017732}
+  m_Layer: 0
+  m_Name: Votantes
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2141017732
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2141017731}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25789c44bfcceb94a8aaa0704cac3a7b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VotanteSpawner
+  eventosJson: {fileID: 4900000, guid: 899b7eb561a60534580c46f373d43feb, type: 3}
+  prefabMujer: {fileID: 8934724367240959243, guid: 2ec8aa13abc71e044ad6422a93bb3fe0, type: 3}
+  prefabHombre: {fileID: 2730775184607131477, guid: f452a819618afbb4da2ff205f3d853fd, type: 3}
+  prefabMayor: {fileID: 8329582306626686311, guid: 34caa9292c4d61b4f8042e22998e0d84, type: 3}
+  prefabSillaRuedas: {fileID: 672686297850969829, guid: f7503d87d7786b3448b866b7be2a04f7, type: 3}
+  prefabEmbarazada: {fileID: 5317957189836269010, guid: e79ab392f5e518a49842e7bc808b249f, type: 3}
+  crearTodosAlIniciar: 0
+--- !u!4 &2141017733
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2141017731}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -2694,3 +2745,4 @@ SceneRoots:
   - {fileID: 2116312670}
   - {fileID: 1362701377}
   - {fileID: 1763695655}
+  - {fileID: 2141017733}
