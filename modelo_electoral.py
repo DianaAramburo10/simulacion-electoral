@@ -372,7 +372,8 @@ class ModeloElectoral(mesa.Model):
         heapq.heappush(self.eventos, (tiempo, self.contador, tipo, votante, recurso))
 
     
-    def enviar_a_unity(self, t, tipo, texto, votante=None, importante=True):
+    def enviar_a_unity(self, t, tipo, texto, votante=None, importante=True, recurso=None, **extra):
+        # recurso: índice del verificador o mampara; la última mampara es la accesible
         evento = {
             't_min': round(t, 2),
             'hora': self.hora(t),
@@ -381,8 +382,12 @@ class ModeloElectoral(mesa.Model):
             'estado': votante.estado if votante else None,
             'edad': votante.edad if votante else None,
             'genero': votante.genero if votante else None,
+            'prioritario': votante.prioritario if votante else None,
+            'motivo_prioridad': votante.motivo_prioridad if votante else None,
+            'recurso': recurso,
             'texto': texto
         }
+        evento.update(extra)
 
         self.eventos_unity.append(evento)
 
@@ -461,10 +466,12 @@ class ModeloElectoral(mesa.Model):
         if self.casilla.robada or self.casilla.suspendida_definitiva:
             votante.estado = 'Sin casilla'
             votante.salida = t
+            self.enviar_a_unity(t, 'Sin casilla', f'Votante {votante.id} llega y ya no hay casilla.', votante, importante=False)
             return
         if t >= T_CIERRE or self.casilla.cerrada:
             votante.estado = 'Llegó después del cierre'
             votante.salida = t
+            self.enviar_a_unity(t, 'Llegada tardía', f'Votante {votante.id} llega después del cierre.', votante, importante=False)
             return
         if votante.llegada is None:
             votante.llegada = t
@@ -528,7 +535,7 @@ class ModeloElectoral(mesa.Model):
             if votante.credencial_problema or votante.ya_voto:
                 duracion += self.random.uniform(1, 3)
             self.nuevo_evento(t + duracion, 'Verificar', votante, i)
-            self.enviar_a_unity(t, 'Verificación', f'Votante {votante.id} inicia verificación.', votante, importante=False)
+            self.enviar_a_unity(t, 'Verificación', f'Votante {votante.id} inicia verificación.', votante, importante=False, recurso=i)
 
     def fin_verificacion(self, votante, recurso, t):
         self.verificadores[recurso] = True
@@ -569,10 +576,19 @@ class ModeloElectoral(mesa.Model):
     def mampara(self, t):
         if not self.casilla.puede_atender(t):
             return
+        accesible = self.NUM_MAMPARAS - 1
         for i in range(self.NUM_MAMPARAS):
             if not self.mamparas[i] or not self.fila_mampara:
                 continue
-            votante = self.fila_mampara.popleft()
+            if i == accesible:
+                # preferencia para discapacidad, pero la puede usar cualquiera
+                votante = next((v for v in self.fila_mampara if v.motivo_prioridad == 'discapacidad'), self.fila_mampara[0])
+            else:
+                # la silla de ruedas solo cabe en la accesible
+                votante = next((v for v in self.fila_mampara if v.motivo_prioridad != 'discapacidad'), None)
+                if votante is None:
+                    continue
+            self.fila_mampara.remove(votante)
             self.mamparas[i] = False
             votante.estado = 'En mampara'
             duracion = self.random.gammavariate(4, 40) / 60
@@ -581,7 +597,7 @@ class ModeloElectoral(mesa.Model):
             if votante.indeciso:
                 duracion *= 1.5
             self.nuevo_evento(t + duracion, 'Mampara', votante, i)
-            self.enviar_a_unity(t, 'Mampara', f'Votante {votante.id} comienza a votar.', votante, importante=False)
+            self.enviar_a_unity(t, 'Mampara', f'Votante {votante.id} comienza a votar.', votante, importante=False, recurso=i)
 
     def depositar(self, votante, t):
         for eleccion, marca in votante.boletas.items():
@@ -686,6 +702,7 @@ class ModeloElectoral(mesa.Model):
                 self.fila_verificacion.remove(votante)
                 votante.estado = 'Abandonó por inundación'
                 votante.salida = t
+                self.enviar_a_unity(t, 'Abandono', f'Votante {votante.id} abandona la fila por la inundación.', votante, importante=False)
         self.suspender(t, duracion, 'inundación')
         self.enviar_a_unity(t, 'Inundación', f'Se suspende la casilla {duracion:.1f} minutos.')
 
@@ -699,13 +716,14 @@ class ModeloElectoral(mesa.Model):
             return
         atacantes = max(3, self.poisson(8))
         self.casilla.incidentes['Ataque Minion'] += 1
-        self.enviar_a_unity(t, 'Ataque', f'¡Llegan {atacantes} Minions para robarse la casilla!')
+        self.enviar_a_unity(t, 'Ataque', f'¡Llegan {atacantes} Minions para robarse la casilla!', atacantes=atacantes)
         for votante in list(self.fila_verificacion):
             votante.estres = 100
             if self.random.random() < 0.8:
                 self.fila_verificacion.remove(votante)
                 votante.estado = 'Huyó de los Minions'
                 votante.salida = t
+                self.enviar_a_unity(t, 'Huida', f'Votante {votante.id} huye de los Minions.', votante, importante=False)
         if self.presidente.proteger_urna(atacantes):
             self.casilla.incidentes['Urna protegida'] += 1
             duracion = self.triangular(10, 30, 120)
@@ -725,6 +743,7 @@ class ModeloElectoral(mesa.Model):
             for votante in list(self.fila_verificacion) + list(self.fila_mampara):
                 votante.estado = 'Sin casilla'
                 votante.salida = t
+                self.enviar_a_unity(t, 'Sin casilla', f'Votante {votante.id} se queda sin casilla y se retira.', votante, importante=False)
             self.fila_verificacion.clear()
             self.fila_mampara.clear()
             self.enviar_a_unity(t, 'Robo exitoso', '¡LOS MINIONS SE LLEVAN LA CASILLA! La votación queda suspendida definitivamente.')
@@ -992,6 +1011,7 @@ class ModeloElectoral(mesa.Model):
                 if votante is not None:
                     votante.estado = 'Proceso interrumpido'
                     votante.salida = t
+                    self.enviar_a_unity(t, 'Proceso interrumpido', f'Votante {votante.id} no pudo terminar de votar.', votante, importante=False)
                 if tipo == 'Verificar':
                     self.verificadores[recurso] = True
                 elif tipo == 'Mampara':
