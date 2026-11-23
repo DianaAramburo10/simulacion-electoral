@@ -12,5 +12,10 @@ public class RelojSimulacion : MonoBehaviour
 
     void Awake() => Instancia = this;
 
-    void Update() => t += minutosPorSegundo * Time.deltaTime;
+    void Update()
+    {
+        // se detiene en el último evento (el PREP)
+        var eventos = VotanteSpawner.Instancia.Eventos;
+        t = Mathf.Min(t + minutosPorSegundo * Time.deltaTime, eventos[eventos.Count - 1].t_min);
+    }
 }

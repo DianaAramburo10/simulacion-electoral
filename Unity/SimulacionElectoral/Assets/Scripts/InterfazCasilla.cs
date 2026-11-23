@@ -5,10 +5,11 @@ using UnityEngine;
 public class InterfazCasilla : MonoBehaviour
 {
     public TMP_Text textoReloj, textoFila, textoAtendidos, textoAviso;
+    public GameObject fondoAviso; // opcional: se oculta cuando no hay aviso
     public float segundosAviso = 4f;
 
     readonly HashSet<int> enFila = new(), atendidos = new();
-    readonly Queue<string> avisos = new(); // varios eventos pueden caer en el mismo minuto
+    readonly Queue<EventoSim> avisos = new(); // varios eventos pueden caer en el mismo minuto
     int siguiente;
     float ocultarAvisoEn;
 
@@ -24,8 +25,11 @@ public class InterfazCasilla : MonoBehaviour
         textoAtendidos.text = $"Votaron: {atendidos.Count}";
         if (Time.time > ocultarAvisoEn)
         {
-            textoAviso.text = avisos.Count > 0 ? avisos.Dequeue() : "";
+            // a velocidad alta se acumulan; los de más de 30 min de atraso ya no se muestran
+            while (avisos.Count > 0 && t - avisos.Peek().t_min > 30f) avisos.Dequeue();
+            textoAviso.text = avisos.Count > 0 ? $"{avisos.Peek().hora} · {avisos.Dequeue().texto}" : "";
             ocultarAvisoEn = Time.time + segundosAviso;
+            if (fondoAviso != null) fondoAviso.SetActive(textoAviso.text != "");
         }
     }
 
@@ -33,7 +37,7 @@ public class InterfazCasilla : MonoBehaviour
     {
         if (e.votante == 0)
         {
-            avisos.Enqueue(e.texto);
+            avisos.Enqueue(e);
             return;
         }
         // cualquier evento distinto de formarse saca al votante de la fila
