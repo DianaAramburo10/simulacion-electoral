@@ -35,6 +35,7 @@ class Votante(mesa.Agent):
     def __init__(self, model, numero, edad, genero):
         super().__init__(model)
         self.id = numero
+        self.nombre = f'Votante {numero}'
         self.edad = edad
         self.genero = genero
         self.estado = 'En camino'
@@ -119,6 +120,16 @@ class Votante(mesa.Agent):
     def decidir_votar_otra_vez(self):
         return self.tramposo and (not self.intento_doble)
 
+    def recibir(self, performativa, contenido):
+        if contenido == 'muestre su credencial':
+            return 'inform', 'ya votó' if self.ya_voto else (self.credencial_problema or 'vigente')
+        if contenido == 'muévanse bajo techo':
+            self.estres = max(0, self.estres - 10)
+            return 'agree', 'me muevo'
+        if contenido == 'retírese de la fila':
+            return 'agree', 'me retiro'
+        return None
+
     def actuar(self, evento, t, recurso=-1):
         if evento == 'Llegada':
             self.model.llegada_votante(self, t)
@@ -142,16 +153,17 @@ class Funcionario(mesa.Agent):
     def __init__(self, model, rol):
         super().__init__(model)
         self.rol = rol
+        self.nombre = rol
         self.presente = True
         self.origen = 'propietario'
 
-    def revisar_credencial(self, votante):
-        if votante.ya_voto:
+    def revisar_credencial(self, credencial):
+        if credencial == 'ya votó':
             if self.model.random.random() < 0.99:
                 return 'ya_voto'
             return 'ok_duplicado'
-        if votante.credencial_problema:
-            return votante.credencial_problema
+        if credencial != 'vigente':
+            return credencial
         return 'ok'
 
     def actuar(self, votante, recurso, t):
@@ -176,17 +188,31 @@ class Presidente(Funcionario):
     def proteger_urna(self, atacantes):
         return self.model.random.random() < max(0.2, 0.9 - 0.04 * atacantes)
 
+    def recibir(self, performativa, contenido):
+        if contenido == 'pido pasar primero':
+            return 'agree', 'pase primero'
+        if contenido == 'pido recuento':
+            return 'agree', 'se recuenta el voto'
+        return None
+
 class Representante(mesa.Agent):
 
     def __init__(self, model, partido):
         super().__init__(model)
         self.partido = partido
+        self.nombre = f'Representante {partido}'
         self.combatividad = self.model.random.uniform(0.1, 0.5)
 
     def decidir_protestar(self):
         return self.model.random.random() < self.combatividad
 
 class CAE(mesa.Agent):
+    nombre = 'CAE'
+
+    def recibir(self, performativa, contenido):
+        if contenido == 'acta lista':
+            return 'agree', 'llevo el acta al PREP'
+        return None
 
     def transmitir(self, t):
         self.model.traslado = self.model.random.lognormvariate(math.log(20), 0.4)
@@ -265,6 +291,7 @@ class ModeloElectoral(mesa.Model):
         self.fila_mampara = deque()
         self.eventos = []
         self.eventos_unity = []
+        self.mensajes = []
         self.contador = 0
         self.casilla = Casilla()
         self.presidente = Presidente(self, 'Presidente')
@@ -395,6 +422,15 @@ class ModeloElectoral(mesa.Model):
             print(f'{self.hora(t)} | {texto}')
 
 
+    def enviar(self, t, emisor, receptor, performativa, contenido):
+        # mensaje tipo FIPA; el receptor decide la respuesta en su método recibir
+        self.mensajes.append((round(t, 2), self.hora(t), emisor.nombre, receptor.nombre, performativa, contenido))
+        respuesta = receptor.recibir(performativa, contenido)
+        if respuesta is None:
+            return None
+        self.mensajes.append((round(t, 2), self.hora(t), receptor.nombre, emisor.nombre, *respuesta))
+        return respuesta[1]
+
     def tiempo_disponible(self, t):
         return max(t, self.casilla.pausada_hasta, self.casilla.suspendida_hasta)
 
@@ -503,7 +539,7 @@ class ModeloElectoral(mesa.Model):
         for i, otro in enumerate(self.fila_verificacion):
             if otro.prioritario:
                 posicion = i + 1
-        if votante.decidir_prioridad() and posicion < len(self.fila_verificacion):
+        if votante.decidir_prioridad() and posicion < len(self.fila_verificacion) and self.enviar(t, votante, self.presidente, 'request', 'pido pasar primero') == 'pase primero':
             self.fila_verificacion.insert(posicion, votante)
             self.enviar_a_unity(t, 'Prioridad', f'Votante {votante.id} ({votante.edad} años, {votante.motivo_prioridad}) pide pasar primero y se adelanta {votante.personas_en_fila - posicion} lugares.', votante)
         else:
@@ -539,7 +575,13 @@ class ModeloElectoral(mesa.Model):
 
     def fin_verificacion(self, votante, recurso, t):
         self.verificadores[recurso] = True
-        resultado = self.personal_mesa[recurso].revisar_credencial(votante)
+        funcionario = self.personal_mesa[recurso]
+        credencial = self.enviar(t, funcionario, votante, 'request', 'muestre su credencial')
+        resultado = funcionario.revisar_credencial(credencial)
+        if resultado in ('ok', 'ok_duplicado'):
+            self.enviar(t, funcionario, votante, 'agree', 'pase a la mampara')
+        else:
+            self.enviar(t, funcionario, votante, 'refuse', resultado)
         if resultado == 'ya_voto':
             votante.estado = 'Rechazado (doble voto)'
             votante.salida = t
@@ -662,6 +704,7 @@ class ModeloElectoral(mesa.Model):
                     involucrados = [a, b]
                 for votante in involucrados:
                     if votante in self.fila_verificacion:
+                        self.enviar(t, self.presidente, votante, 'request', 'retírese de la fila')
                         self.fila_verificacion.remove(votante)
                         votante.estado = 'Retirado por pelea'
                         votante.salida = t
@@ -957,7 +1000,8 @@ class ModeloElectoral(mesa.Model):
                     decision = self.presidente.decidir_voto_dudoso()
                     if decision == 'nulo':
                         conteo['Nulos'] += 1
-                        if self.representantes[partido].decidir_protestar():
+                        representante = self.representantes[partido]
+                        if representante.decidir_protestar() and self.enviar(t + tiempo_total + tiempo, representante, self.presidente, 'request', 'pido recuento') == 'se recuenta el voto':
                             recuento = self.random.uniform(5, 15)
                             tiempo += recuento
                             self.casilla.recuentos += 1
@@ -973,6 +1017,7 @@ class ModeloElectoral(mesa.Model):
     def fin_escrutinio(self, t):
         self.casilla.fin_escrutinio = t
         self.enviar_a_unity(t, 'Fin escrutinio', 'Termina el conteo de votos.')
+        self.enviar(t, self.presidente, self.cae, 'inform', 'acta lista')
         self.nuevo_evento(self.cae.transmitir(t), 'PREP')
 
     def prep(self, t):
@@ -1051,7 +1096,7 @@ class ModeloElectoral(mesa.Model):
         elif tipo == 'TechoListo':
             self.casilla.techo = True
             for votante in self.fila_verificacion:
-                votante.estres = max(0, votante.estres - 10)
+                self.enviar(t, self.presidente, votante, 'request', 'muévanse bajo techo')
         elif tipo == 'FinLluvia':
             self.casilla.lloviendo = False
             self.enviar_a_unity(t, 'Fin lluvia', 'Deja de llover.')
@@ -1148,6 +1193,11 @@ class ModeloElectoral(mesa.Model):
                     "Si" if votante.ya_voto else "No"
                 ])
 
+        with open("mensajes_agentes.csv", "w", newline="", encoding="utf-8-sig") as archivo:
+            escritor = csv.writer(archivo)
+            escritor.writerow(["t_min", "Hora", "Emisor", "Receptor", "Performativa", "Contenido"])
+            escritor.writerows(self.mensajes)
+
         print("Archivos para gráficas exportados correctamente.")
 
 
@@ -1207,6 +1257,8 @@ class ModeloElectoral(mesa.Model):
             json.dump(sorted(self.eventos_unity, key=lambda evento: evento['t_min']), archivo, ensure_ascii=False, indent=2)
 
         print(f'\n{len(self.eventos_unity)} eventos guardados en eventos_unity.json')
+        print(f'{len(self.mensajes)} mensajes entre agentes guardados en mensajes_agentes.csv:',
+              dict(Counter(m[4] for m in self.mensajes)))
         print('\nSIMULACIÓN FINALIZADA')
 
     def estado_unity(self):
